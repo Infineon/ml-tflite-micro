@@ -2,7 +2,7 @@
 
 ## Overview
 
-The ml-tflite-micro library is a pre-compiled TensorFlow tflite-micro runtime library for Infineon PSoC™ 6 microcontrollers.
+The ml-tflite-micro library is a pre-compiled TensorFlow tflite-micro runtime library for Infineon PSOC™ 6 microcontrollers.
 
 ### What is Provided
 
@@ -12,7 +12,7 @@ Infineon provides the following methods for running the TFLiteU inference engine
 
 2. TfliteU interpreter-less: Uses pre-generated model specific code to perform the inference without an interpreter. This allows for smaller binaries as well as less overhead on inference execution.
 
-In both cases, this version of the library provides two types of quantization - `floating point` and `8-bit integer`.
+In both cases, this version of the library provides three types of quantization - `floating point`, `16-bit integer` and `8-bit integer`.
 
 ### Quick Start
 
@@ -23,17 +23,20 @@ To use this library, the following `COMPONENTS` and `DEFINES` are required:
 
 TFLiteU runtime interpreter:
 - DEFINES+=TF_LITE_STATIC_MEMORY
-- COMPONENTS+=ML_TFLM_INTERPRETER IFX_CMSIS_NN
+- COMPONENTS+=ML_TFLM
 
 TFLiteU interpreter less:
 - DEFINES+=TF_LITE_STATIC_MEMORY TF_LITE_MICRO_USE_OFFLINE_OP_USER_DATA
-- COMPONENTS+=ML_TFLM_INTERPRETER_LESS IFX_CMSIS_NN
+- COMPONENTS+=ML_TFLM_LESS
 
 TFLiteU floating point quantization:
 - COMPONENTS+=ML_FLOAT32
 
 TFLiteU 8-bit integer quantization:
 - COMPONENTS+=ML_INT8x8
+
+TFLiteU 16-bit integer quantization:
+- COMPONENTS+=ML_INT16x8
 
 Why these `DEFINES` are required:
 
@@ -44,16 +47,16 @@ This is a google defined setting. This must be defined for all TFLiteU builds be
 Infineon defined setting. This is required when selecting TFliteU interpreter less. When defined, the prepared phase kernel variant selection code is dropped and TFLitU kernal convolution evaluation functions are used instead. This turns on the use of per-instance pre-computed parameters in TFLM interpreter less. Furthermore, uses pre-compiled data previously captured from a model Init/Prepare call.
 Advantages: Smaller binaries, since only the required kernels are compiled. Smaller runtime, because many intermediate values are stored
 
+`TF_LITE_STRIP_ERROR_STRINGS`:
+This is a google defined setting. A release-variant of TFLM library is built, so need this one to strip MicroPrintf() routine calls.
+
 Why these `COMPONENTS` are required:
 
-`ML_TFLM_INTERPRETER/ML_TFLM_INTERPRETER_LESS`:
-Determine whether you would like to use the runtime interpreter or TFliteU interpreter less. Either `ML_TFLM_INTERPRETER` or `ML_TFLM_INTERPRETER_LESS` must always be defined.
+`ML_TFLM/ML_TFLM_LESS`:
+Determine whether you would like to use the runtime interpreter or TFliteU interpreter less variant. Either `ML_TFLM` or `ML_TFLM_LESS` must always be defined.
 
-`IFX_CMSIS_NN`:
-This `DEFINE` is always required as it is used to select the appropriate kernal variant for M4 based MCU's.
-
-`ML_FLOAT32/ML_INT8x8`:
-Sets the quantization to be float or 8 bit integer. One of these must always be defined.
+`ML_FLOAT32/ML_INT16x8/ML_INT8x8`:
+Sets the quantization to be float, 16 bit or 8 bit integer. One of these must always be defined.
 
 See [tensorflow-lite documentation](https://www.tensorflow.org/lite) for general information on on how to prepare and optimize AI/ML applications for execution using tensorflow-lite(micro). Information specific to the tensorflow-lite(micro) runtime environment for Microcontrollers is found [here](https://www.tensorflow.org/lite/microcontrollers).
 
@@ -66,5 +69,5 @@ See [tensorflow-lite documentation](https://www.tensorflow.org/lite) for general
 * [Cypress Semiconductor](http://www.cypress.com)
 
 ---
-© 2022, Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation.
+© 2022-2025, Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation.
 
