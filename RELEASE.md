@@ -2,22 +2,17 @@
 
 ## What's Included?
 
-Refer to the [README.md](./README.md) for a complete description of the ModusToolbox™ Machine Learning TFLiteU asset.
+Refer to the [README.md](./README.md) and the [API Reference Guide](https://cypresssemiconductorco.github.io/mtb-asset-template/html/index.html) for a complete description of the MTB Asset Template.
 
 ## What Changed?
-
-### v3.1.0
-
-* Updated TensorFlow up to 2.14.1
-* int16 quantization for inputs
-* Added LSTM models support
-* Removed dependency to the Y data as they were not used
-* Update configuration JSON schema
-* Fixed issue when calibration data were limited to the 200 samples
 
 ### v3.0.1
 
 * PSOC6 patch release version
+
+### v2.0.1
+
+* Patch release with GCC14 support
 
 ### v2.0.0
 
@@ -30,8 +25,8 @@ This version of the ModusToolbox™ Machine Learning TFLiteU asset was validated
 
 | Software and Tools                                      | Version      |
 | :---                                                    | :----:       |
-| ModusToolbox™ Software Environment                      | 3.3.0        |
-| GCC Compiler                                            | 11.3         |
+| ModusToolbox™ Software Environment                      | 3.5.0        |
+| GCC Compiler                                            | 14.2.1       |
 | ARM Compiler 6                                          | 6.22         |
 
 ## More information
