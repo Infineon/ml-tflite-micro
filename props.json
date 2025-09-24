@@ -5,8 +5,10 @@
     },
     "opt" : {
         "stop-at" : [
-            "COMPONENT_ML_TFLM_INTERPRETER/include/flatbuffers/include",
-            "COMPONENT_ML_TFLM_INTERPRETER_LESS/include/flatbuffers/include"
+            "COMPONENT_ML_TFLM/include/flatbuffers/include",
+            "COMPONENT_ML_TFLM_LESS/include/flatbuffers/include",
+            "COMPONENT_ML_TFLM/include/signal",
+            "COMPONENT_ML_TFLM_LESS/include/signal"
         ]
     }
 }

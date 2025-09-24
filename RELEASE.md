@@ -2,17 +2,21 @@
 
 ## What's Included?
 
-Refer to the [README.md](./README.md) and the [API Reference Guide](https://cypresssemiconductorco.github.io/mtb-asset-template/html/index.html) for a complete description of the MTB Asset Template.
+Refer to the [README.md](./README.md) for a complete description of the ModusToolbox™ Machine Learning TFLiteU asset.
 
 ## What Changed?
 
-### v3.0.1
+### v3.1.0
 
-* PSOC6 patch release version
-
-### v2.0.1
-
-* Patch release with GCC14 support
+* Implemented support for PSOC Edge™ capabilities:
+    * Cortex-M33 (CPU-based inference)
+    * NNLite™ NPU integration (Cortex-M33 core only)
+    * EthosU U55 NPU integration (Cortex-M55 core only)
+* Updated TensorFlow up to 2.14.1 and set ethos-u-vela up to 3.11
+* Added LSTM models support
+* Removed dependency to the Y data as they were not used
+* Update configuration JSON schema
+* Fixed issue when calibration data were limited to the 200 samples
 
 ### v2.0.0
 
@@ -25,9 +29,12 @@ This version of the ModusToolbox™ Machine Learning TFLiteU asset was validated
 
 | Software and Tools                                      | Version      |
 | :---                                                    | :----:       |
-| ModusToolbox™ Software Environment                      | 3.5.0        |
-| GCC Compiler                                            | 14.2.1       |
+| ModusToolbox™ Software Environment                      | 3.4.0        |
+| GCC Compiler                                            | 11.3         |
 | ARM Compiler 6                                          | 6.22         |
+| LLVM**                                                  | 19.1.1       |
+
+**LLVM supported for CM4- and CM33-only, CM33 with NNLite, softFP only.
 
 ## More information
 
