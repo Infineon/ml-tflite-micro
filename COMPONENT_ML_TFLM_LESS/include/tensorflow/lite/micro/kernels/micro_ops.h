@@ -102,6 +102,8 @@ TFLMRegistration Register_READ_VARIABLE();
 TFLMRegistration Register_REDUCE_MAX();
 TFLMRegistration Register_RELU();
 TFLMRegistration Register_RELU6();
+TFLMRegistration Register_RELU0TO1();
+TFLMRegistration Register_RELUN1TO1();
 TFLMRegistration Register_RESHAPE();
 TFLMRegistration Register_RESIZE_BILINEAR();
 TFLMRegistration Register_RESIZE_NEAREST_NEIGHBOR();

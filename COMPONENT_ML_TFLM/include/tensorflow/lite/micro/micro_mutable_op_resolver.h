@@ -494,6 +494,16 @@ class MicroMutableOpResolver : public MicroOpResolver {
     return AddBuiltin(BuiltinOperator_RELU6, tflite::Register_RELU6(),
                       ParseRelu6);
   }
+  
+  TfLiteStatus AddRelu0to1() {
+    return AddBuiltin(BuiltinOperator_RELU_0_TO_1, tflite::Register_RELU0TO1(),
+                      ParseRelu0to1);
+  }
+
+  TfLiteStatus AddReluN1to1() {
+    return AddBuiltin(BuiltinOperator_RELU_N1_TO_1, tflite::Register_RELUN1TO1(),
+                      ParseReluN1to1);
+  }
 
   TfLiteStatus AddReshape() {
     return AddBuiltin(BuiltinOperator_RESHAPE, Register_RESHAPE(),

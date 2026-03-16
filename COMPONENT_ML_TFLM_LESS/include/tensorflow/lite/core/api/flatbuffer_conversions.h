@@ -313,6 +313,12 @@ TfLiteStatus ParseRelu(const Operator* op, ErrorReporter* error_reporter,
 TfLiteStatus ParseRelu6(const Operator* op, ErrorReporter* error_reporter,
                         BuiltinDataAllocator* allocator, void** builtin_data);
 
+TfLiteStatus ParseRelu0to1(const Operator* op, ErrorReporter* error_reporter,
+                           BuiltinDataAllocator* allocator, void** builtin_data);
+
+TfLiteStatus ParseReluN1to1(const Operator* op, ErrorReporter* error_reporter,
+                            BuiltinDataAllocator* allocator, void** builtin_data);
+
 TfLiteStatus ParseReshape(const Operator* op, ErrorReporter* error_reporter,
                           BuiltinDataAllocator* allocator, void** builtin_data);
 

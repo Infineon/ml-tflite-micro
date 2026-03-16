@@ -36,6 +36,16 @@ struct Relu6OpData {
   int32_t zero;
 };
 
+struct Relu0to1OpData {
+  int32_t one;
+  int32_t zero;
+};
+
+struct ReluN1to1OpData {
+  int32_t one;
+  int32_t neg_one;
+};
+
 void ReluQuantized(const ReluOpData& data, const RuntimeShape& input_shape,
                    const RuntimeShape& output_shape, const int8_t* input_data,
                    int8_t* output_data);
@@ -62,10 +72,43 @@ void Relu6Quantized(T lower, T upper, const RuntimeShape& input_shape,
   }
 }
 
+void Relu0to1Float(const RuntimeShape& input_shape, const float* input_data,
+                const RuntimeShape& output_shape, float* output_data);
+
+template <typename T>
+void Relu0to1Quantized(T lower, T upper, const RuntimeShape& input_shape,
+                    const T* input_data, const RuntimeShape& output_shape,
+                    T* output_data) {
+  const int flat_size = MatchingFlatSize(input_shape, output_shape);
+  for (int i = 0; i < flat_size; ++i) {
+    const T val = input_data[i];
+    const T clamped = val > upper ? upper : val < lower ? lower : val;
+    output_data[i] = clamped;
+  }
+}
+
+void ReluN1to1Float(const RuntimeShape& input_shape, const float* input_data,
+                const RuntimeShape& output_shape, float* output_data);
+
+template <typename T>
+void ReluN1to1Quantized(T lower, T upper, const RuntimeShape& input_shape,
+                    const T* input_data, const RuntimeShape& output_shape,
+                    T* output_data) {
+  const int flat_size = MatchingFlatSize(input_shape, output_shape);
+  for (int i = 0; i < flat_size; ++i) {
+    const T val = input_data[i];
+    const T clamped = val > upper ? upper : val < lower ? lower : val;
+    output_data[i] = clamped;
+  }
+}
+
 TfLiteStatus ReluPrepare(TfLiteContext* context, TfLiteNode* node);
 
 TfLiteStatus Relu6Prepare(TfLiteContext* context, TfLiteNode* node);
 
+TfLiteStatus Relu0to1Prepare(TfLiteContext* context, TfLiteNode* node);
+
+TfLiteStatus ReluN1to1Prepare(TfLiteContext* context, TfLiteNode* node);
 }  // namespace tflite
 
 #endif  // TENSORFLOW_LITE_MICRO_KERNELS_ACTIVATIONS_H_
