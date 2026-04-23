@@ -216,7 +216,13 @@ inline void ConvPerChannel(
                 // 32767] -
                 // [-32768, 32767]), which is [-8322945, 8322945].
                 // log2(8322945) = 22.99.
+#if defined(IFX_CMSIS_NN)
+                // IFX: Adding ip/op offset inorder to test randomized cases in MXNNLITE where hardware allows nonzero zero point for 16bit act.
+                const int32_t input_offset = params.input_offset;  // r = s(q - Z)
+                acc += filter_val * (input_val + input_offset);
+#else
                 acc += filter_val * input_val;
+#endif
               }
             }
           }
@@ -225,6 +231,10 @@ inline void ConvPerChannel(
           }
           int32_t scaled_acc = MultiplyByQuantizedMultiplier(
               acc, output_multiplier[out_channel], output_shift[out_channel]);
+#if defined(IFX_CMSIS_NN)
+          const int32_t output_offset = params.output_offset;
+          scaled_acc += output_offset;
+#endif
           scaled_acc = std::max(scaled_acc, output_activation_min);
           scaled_acc = std::min(scaled_acc, output_activation_max);
           output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =

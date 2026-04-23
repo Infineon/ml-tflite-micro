@@ -18,6 +18,12 @@ limitations under the License.
 #include <cstddef>
 #include <cstdint>
 
+#ifdef USE_TFLM_COMPRESSION
+
+#include <initializer_list>
+
+#endif  // USE_TFLM_COMPRESSION
+
 #include "flatbuffers/flatbuffers.h"  // from @flatbuffers
 #include "tensorflow/lite/c/c_api_types.h"
 #include "tensorflow/lite/c/common.h"
@@ -190,6 +196,20 @@ class MicroInterpreter {
     hooks_ = hooks;
   }
 
+  // Set the alternate MicroProfilerInterface.
+  // This value is passed through to the MicroContext.
+  // This can be used to profile subsystems simultaneously with the profiling
+  // of kernels during the Eval phase.  See (b/379584353).
+  // The alternate MicroProfilerInterface is currently used by the tensor
+  // decompression subsystem.
+  TfLiteStatus SetAlternateProfiler(MicroProfilerInterface* alt_profiler);
+
+  // Set the alternate decompression memory regions.
+  // Can only be called during the MicroInterpreter kInit state (i.e. must
+  // be called before MicroInterpreter::AllocateTensors).
+  TfLiteStatus SetDecompressionMemory(
+      const std::initializer_list<MicroContext::AlternateMemoryRegion>&
+          regions);
 
  protected:
   const MicroAllocator& allocator() const { return allocator_; }

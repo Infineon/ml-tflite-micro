@@ -1,4 +1,4 @@
-/* Copyright 2021 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2025 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ limitations under the License.
 
 #include "tensorflow/lite/c/builtin_op_data.h"
 #include "tensorflow/lite/c/common.h"
+#include "tensorflow/lite/kernels/internal/common.h"
 #include "tensorflow/lite/kernels/internal/types.h"
 
 namespace tflite {
@@ -27,80 +28,45 @@ namespace tflite {
 extern const int kActivationsInputTensor;
 extern const int kActivationsOutputTensor;
 
-struct ReluOpData {
-  ReluParams params;
+struct ReluFloatParams {
+  float activation_min;
+  float activation_max;
 };
 
-struct Relu6OpData {
-  int32_t six;
-  int32_t zero;
+
+
+union ReluOpData {
+    ReluParams params;
+    ReluFloatParams flt_params;
 };
 
-struct Relu0to1OpData {
-  int32_t one;
-  int32_t zero;
-};
 
-struct ReluN1to1OpData {
-  int32_t one;
-  int32_t neg_one;
-};
-
-void ReluQuantized(const ReluOpData& data, const RuntimeShape& input_shape,
-                   const RuntimeShape& output_shape, const int8_t* input_data,
-                   int8_t* output_data);
+template <typename T>
+void ReluQuantized(const ReluParams& qnt_params, const RuntimeShape& input_shape,
+                   const RuntimeShape& output_shape, const T* input_data,
+                   T* output_data) {
+  const int flat_size = MatchingFlatSize(input_shape, output_shape);
+  for (int i = 0; i < flat_size; ++i) {
+    const int32_t val = static_cast<int32_t>(input_data[i]);
+    int32_t clamped =
+        qnt_params.output_offset +
+        MultiplyByQuantizedMultiplier(val - qnt_params.input_offset,
+                                      qnt_params.output_multiplier,
+                                      qnt_params.output_shift);
+    clamped = std::max(qnt_params.quantized_activation_min, clamped);
+    clamped = std::min(qnt_params.quantized_activation_max, clamped);
+    output_data[i] = static_cast<T>(clamped);
+  }
+}
 
 template <typename T>
 void CalculateReluOpData(const TfLiteTensor* input, TfLiteTensor* output,
                          ReluOpData* data);
 
-void ReluFloat(const RuntimeShape& input_shape, const float* input_data,
+void ReluFloat(const ReluFloatParams& flt_params,
+               const RuntimeShape& input_shape, const float* input_data,
                const RuntimeShape& output_shape, float* output_data);
 
-void Relu6Float(const RuntimeShape& input_shape, const float* input_data,
-                const RuntimeShape& output_shape, float* output_data);
-
-template <typename T>
-void Relu6Quantized(T lower, T upper, const RuntimeShape& input_shape,
-                    const T* input_data, const RuntimeShape& output_shape,
-                    T* output_data) {
-  const int flat_size = MatchingFlatSize(input_shape, output_shape);
-  for (int i = 0; i < flat_size; ++i) {
-    const T val = input_data[i];
-    const T clamped = val > upper ? upper : val < lower ? lower : val;
-    output_data[i] = clamped;
-  }
-}
-
-void Relu0to1Float(const RuntimeShape& input_shape, const float* input_data,
-                const RuntimeShape& output_shape, float* output_data);
-
-template <typename T>
-void Relu0to1Quantized(T lower, T upper, const RuntimeShape& input_shape,
-                    const T* input_data, const RuntimeShape& output_shape,
-                    T* output_data) {
-  const int flat_size = MatchingFlatSize(input_shape, output_shape);
-  for (int i = 0; i < flat_size; ++i) {
-    const T val = input_data[i];
-    const T clamped = val > upper ? upper : val < lower ? lower : val;
-    output_data[i] = clamped;
-  }
-}
-
-void ReluN1to1Float(const RuntimeShape& input_shape, const float* input_data,
-                const RuntimeShape& output_shape, float* output_data);
-
-template <typename T>
-void ReluN1to1Quantized(T lower, T upper, const RuntimeShape& input_shape,
-                    const T* input_data, const RuntimeShape& output_shape,
-                    T* output_data) {
-  const int flat_size = MatchingFlatSize(input_shape, output_shape);
-  for (int i = 0; i < flat_size; ++i) {
-    const T val = input_data[i];
-    const T clamped = val > upper ? upper : val < lower ? lower : val;
-    output_data[i] = clamped;
-  }
-}
 
 TfLiteStatus ReluPrepare(TfLiteContext* context, TfLiteNode* node);
 

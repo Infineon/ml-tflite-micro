@@ -111,6 +111,23 @@ public:
   }
 
 #if defined(ENABLE_GR_DECODER)
+
+  void SetGRTensorQuantizationParam(TfLitePackedAffineQuantization* packedQuantParams) {
+    int index = 0, index1 = 1;
+    while(index < 8) {
+      if(packedQuantParams[index].custom_sub8bit_packing != nullptr) {
+        baseclass::tensors_[index1].quantization.type = kTfLitePackedAffineQuantization;
+        baseclass::tensors_[index1].quantization.params = const_cast<TfLitePackedAffineQuantization*>(&packedQuantParams[index]);
+      } else {
+        baseclass::tensors_[index1].quantization.type = kTfLiteAffineQuantization;
+        baseclass::tensors_[index1].quantization.params = nullptr;
+      }
+      ++index;
+      ++index1;
+    }
+  }
+
+
   /**
    * Try to replaced weights of LSTM gate with Golomb-Rice packed version
    * 
@@ -120,23 +137,37 @@ public:
    * @return overflow - Weights could not be packed as packed form larger than dimensions allocated for unpacked data.
    */
 
-   bool packGRGateWeights(GateParams &gateParams, std::mt19937 &random,
-    ifx::mxnnlite::GRCompressionMode gr_mode) {
+   bool packGRGateWeights(GateParams &gateParams, int &index1, int &index2,
+        std::mt19937 &random, ifx::mxnnlite::GRCompressionMode gr_mode,
+        const int simd_width, TfLiteCustomSub8BitPackingDetails* packing) {
       size_t actWeightSize = input_dimension*state_dimension;
       std::vector<WeightType> act_weights_vec(gateParams.activation_weight, gateParams.activation_weight+actWeightSize);
-      auto packedActWeightsVec = GRCompression(random, act_weights_vec, gr_mode, actWeightSize);
+      auto packedActWeightsVec = GRCompression(random, act_weights_vec, gr_mode, actWeightSize, &packing[index1]);
       if(actWeightSize < packedActWeightsVec.size()) {
         return true;
       }
 
+      // Set packed metadata.
+      if( state_dimension >= simd_width)
+        packing[index1].compression_type = static_cast<uint8_t>(TfliteCompressionType::FILTERWISE_GR_ENCODING);
+      else
+        packing[index1].compression_type = static_cast<uint8_t>(TfliteCompressionType::GR_ENCODING);
+      std::copy(packedActWeightsVec.begin(), packedActWeightsVec.end(), std::begin(gateParams.activation_weight));
+
+      ++index1;
       size_t reccWeightSize = state_dimension*state_dimension;
       std::vector<WeightType> recc_weights_vec(gateParams.recurrent_weight, gateParams.recurrent_weight+reccWeightSize);
-      auto packedReccWeightsVec = GRCompression(random, recc_weights_vec, gr_mode, reccWeightSize);
+      auto packedReccWeightsVec = GRCompression(random, recc_weights_vec, gr_mode, reccWeightSize, &packing[index2]);
       if (reccWeightSize < packedReccWeightsVec.size()) {
         return true;
       } 
-      std::copy(packedActWeightsVec.begin(), packedActWeightsVec.end(), std::begin(gateParams.activation_weight));
+
+      if( state_dimension >= simd_width)
+        packing[index2].compression_type = static_cast<uint8_t>(TfliteCompressionType::FILTERWISE_GR_ENCODING);
+      else
+        packing[index2].compression_type = static_cast<uint8_t>(TfliteCompressionType::GR_ENCODING);
       std::copy(packedReccWeightsVec.begin(), packedReccWeightsVec.end(),std::begin(gateParams.recurrent_weight));
+      ++index2;
 
       return false;
     }
@@ -147,19 +178,52 @@ public:
    * @return Packing aborted as packed weight(s0 would overflow unpacked weight tensors data vector size.  Weight tensor data invalid.
    */
 
-   bool packGRWeights(std::mt19937 &random, ifx::mxnnlite::GRCompressionMode gr_mode) { 
+   bool packGRWeights(std::mt19937 &random, ifx::mxnnlite::GRCompressionMode gr_mode,
+      const int simd_width, TfLiteCustomSub8BitPackingDetails* packing) { 
     // Pack the quantized weights.
+    int index1 = 0, index2 = 4;
     bool overflow = 
-      packGRGateWeights(this->forget_gate_data_, random, gr_mode) ||
-      packGRGateWeights(this->input_gate_data_, random, gr_mode) ||
-      packGRGateWeights(this->cell_gate_data_, random, gr_mode) ||
-      packGRGateWeights(this->output_gate_data_, random, gr_mode);
+      packGRGateWeights(this->input_gate_data_, index1, index2, random, gr_mode,
+        simd_width, packing) ||
+      packGRGateWeights(this->forget_gate_data_, index1, index2, random, gr_mode,
+        simd_width, packing) ||
+      packGRGateWeights(this->cell_gate_data_, index1, index2, random, gr_mode,
+        simd_width, packing) ||
+      packGRGateWeights(this->output_gate_data_, index1, index2, random, gr_mode,
+        simd_width, packing);
 
     return overflow;
 
   }
 #endif // defined(ENABLE_GR_DECODER)
 
+  void filterwiseGateWeights(GateParams &gateParams, uint8_t simdWidth){
+    int actWeightsShape[3] = {2, state_dimension, input_dimension};
+    TfLiteIntArray* actWeightDims = tflite::testing::IntArrayFromInts(actWeightsShape);
+    size_t actWeightSize = input_dimension*state_dimension;
+    std::vector<WeightType> act_weights_vec(gateParams.activation_weight, gateParams.activation_weight+actWeightSize);
+
+    int reccWeightsShape[3] = {2, state_dimension, state_dimension};
+    TfLiteIntArray* reccWeightDims = tflite::testing::IntArrayFromInts(reccWeightsShape);
+    size_t reccWeightSize = state_dimension*state_dimension;
+    std::vector<WeightType> recc_weights_vec(gateParams.recurrent_weight, gateParams.recurrent_weight+reccWeightSize);
+
+    auto filterwiseActWeightsVec = filterwiseSlicedWeights(act_weights_vec.data(), *actWeightDims, simdWidth);
+    assert(act_weights_vec.size() == filterwiseActWeightsVec.size());
+    auto filterwiseReccWeightsVec = filterwiseSlicedWeights(recc_weights_vec.data(), *reccWeightDims, simdWidth);
+    assert(recc_weights_vec.size() == filterwiseReccWeightsVec.size());
+
+    std::copy(filterwiseActWeightsVec.begin(), filterwiseActWeightsVec.end(), std::begin(gateParams.activation_weight));
+    std::copy(filterwiseReccWeightsVec.begin(), filterwiseReccWeightsVec.end(), std::begin(gateParams.recurrent_weight));
+
+  }
+
+  void filterwiseSlicing(uint8_t simdWidth) {
+    filterwiseGateWeights(this->forget_gate_data_, simdWidth);
+    filterwiseGateWeights(this->input_gate_data_, simdWidth);
+    filterwiseGateWeights(this->cell_gate_data_, simdWidth);
+    filterwiseGateWeights(this->output_gate_data_, simdWidth);
+  }
 };
 
 } //namespace testing

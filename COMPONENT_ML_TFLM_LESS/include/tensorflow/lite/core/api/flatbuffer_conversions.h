@@ -42,9 +42,8 @@ class BuiltinDataAllocator {
   // deallocation.
   template <typename T>
   T* AllocatePOD() {
-    // TODO(b/154346074): Change this to is_trivially_destructible when all
-    // platform targets support that properly.
-    static_assert(std::is_pod<T>::value, "Builtin data structure must be POD.");
+    static_assert(std::is_trivially_destructible<T>::value,
+                  "Builtin data structure must be POD.");
 #if defined(__GNUC__) && defined( __ARM_ARCH)
     // Workaround for arm-gcc: alignof and new are inconsistent.
     // accepting alignof alignment here will trigger memory faults
@@ -155,6 +154,11 @@ TfLiteStatus ParseDequantize(const Operator* op, ErrorReporter* error_reporter,
 
 TfLiteStatus ParseDiv(const Operator* op, ErrorReporter* error_reporter,
                       BuiltinDataAllocator* allocator, void** builtin_data);
+
+TfLiteStatus ParseDynamicUpdateSlice(const Operator* op,
+                                     ErrorReporter* error_reporter,
+                                     BuiltinDataAllocator* allocator,
+                                     void** builtin_data);
 
 TfLiteStatus ParseElu(const Operator* op, ErrorReporter* error_reporter,
                       BuiltinDataAllocator* allocator, void** builtin_data);
@@ -314,10 +318,10 @@ TfLiteStatus ParseRelu6(const Operator* op, ErrorReporter* error_reporter,
                         BuiltinDataAllocator* allocator, void** builtin_data);
 
 TfLiteStatus ParseRelu0to1(const Operator* op, ErrorReporter* error_reporter,
-                           BuiltinDataAllocator* allocator, void** builtin_data);
+                        BuiltinDataAllocator* allocator, void** builtin_data);
 
 TfLiteStatus ParseReluN1to1(const Operator* op, ErrorReporter* error_reporter,
-                            BuiltinDataAllocator* allocator, void** builtin_data);
+                        BuiltinDataAllocator* allocator, void** builtin_data);
 
 TfLiteStatus ParseReshape(const Operator* op, ErrorReporter* error_reporter,
                           BuiltinDataAllocator* allocator, void** builtin_data);
@@ -331,6 +335,10 @@ TfLiteStatus ParseResizeNearestNeighbor(const Operator* op,
                                         ErrorReporter* error_reporter,
                                         BuiltinDataAllocator* allocator,
                                         void** builtin_data);
+
+TfLiteStatus ParseReverseV2(const Operator* op, ErrorReporter* error_reporter,
+                            BuiltinDataAllocator* allocator,
+                            void** builtin_data);
 
 TfLiteStatus ParseRound(const Operator* op, ErrorReporter* error_reporter,
                         BuiltinDataAllocator* allocator, void** builtin_data);
@@ -468,6 +476,11 @@ TfLiteStatus ParseStablehloShiftLeft(const Operator* op,
                                      ErrorReporter* error_reporter,
                                      BuiltinDataAllocator* allocator,
                                      void** builtin_data);
+
+TfLiteStatus ParseStablehloCase(const Operator* op,
+                                ErrorReporter* error_reporter,
+                                BuiltinDataAllocator* allocator,
+                                void** builtin_data);
 
 }  // namespace tflite
 

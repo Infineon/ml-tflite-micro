@@ -45,12 +45,8 @@ EVAL_FUNC_DECL(EvalFloat);
 struct OpData {
   OpDataFullyConnected reference_op_data;
 
-  // Conv 1x1 that may be invoked in some cases currently need per channel
-  // quantization.
-  int32_t* per_channel_output_multiplier;
-  int32_t* per_channel_output_shift;
-
   // Index to buffer for optimizations if applicable.
+  int buffer_conv_1x1_idx;
   int buffer_idx;
 
   int32_t* kernel_sums;

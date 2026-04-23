@@ -22,7 +22,7 @@ namespace micro {
 namespace fully_connected {
 
 struct OpDataMXNNLiteExt {
-  float mxnnlite_scaler;
+  float* per_tensor_or_channel_scaler;
 };
 
 

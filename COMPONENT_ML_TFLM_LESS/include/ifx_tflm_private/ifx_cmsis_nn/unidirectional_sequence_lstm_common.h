@@ -73,7 +73,7 @@ tflite::micro::CppItems* record_opuserdata(OpData& od);
  * @param node 
  * @return TfLiteStatus 
  */
-TfLiteStatus PrepareCommon(TfLiteContext* context, TfLiteNode* node);
+TfLiteStatus PrepareCommon(TfLiteContext* context, TfLiteNode* node, OpData *op_data=nullptr);
 
 
 TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node);

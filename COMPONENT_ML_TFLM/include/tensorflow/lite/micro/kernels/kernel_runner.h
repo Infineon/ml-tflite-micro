@@ -51,7 +51,7 @@ class KernelRunner {
   // Calls invoke on a given TFLMRegistration pointer. After successful
   // invoke, results will be available in the output tensor as passed into the
   // constructor of this class.
-  TfLiteStatus Invoke();
+  TfLiteStatus Invoke(bool no_second_invoke = false);
 
   // Calls Free on a given TFLMRegistration pointer(if it's implemented).
   // After successful Free, kTfLiteOk status will be returned. If Free is not
@@ -67,13 +67,16 @@ class KernelRunner {
   // to stub out MicroGraph methods and track invocations on each subgraph.
   MockMicroGraph* GetMockGraph() { return &mock_micro_graph_; }
 
+  // Returns a pointer to the internal FakeMicroContext.
+  FakeMicroContext* GetFakeMicroContext() { return &fake_micro_context_; }
+
   // Returns true if all temp buffer in tests are deallocated.
   // TODO(b/209453859): move this function to private after deallocation checks
   // are enabled for all kernel tests.
   bool ValidateTempBufferDeallocated();
 
  private:
-  static constexpr int kKernelRunnerBufferSize_ = 20000;
+  static constexpr int kKernelRunnerBufferSize_ = 25000;
   static uint8_t kKernelRunnerBuffer_[kKernelRunnerBufferSize_];
 
   TfLiteContext context_ = {};

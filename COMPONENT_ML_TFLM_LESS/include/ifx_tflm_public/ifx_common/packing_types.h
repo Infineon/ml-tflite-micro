@@ -18,18 +18,24 @@ limitations under the License.
 
 #include <stdint.h>
 
+/**
+ * \brief Packing / compression layout types for weights 
+ * 
+ * Name is inappropriate but now too late to change....
+ */
 enum TfliteCompressionType {
     DENSE = 0,
     NO_RUN_LENGTHS = 1,
     WORD_RUN_LENGTHS = 2,
     CHANNELWISE_DENSE = 3,       // Currently only used for tensor packed for NNLite NPU DW-mode
     GR_ENCODING = 4,
-    FILTERWISE_DENSE =5,
+    FILTERWISE_DENSE = 5,
+    FILTERWISE_GR_ENCODING = 6,
 };
 
 /* MAX_SPEED, MIN_MEMORY indicate intermediate degrees of memory / performance trade-off.
  Currently: the number of "slices" computation is performed in. */
-enum TfliteUnpackingType {
+enum TfliteChannelWiseSliceType {
     NO_HINT = 0,
     MAX_SPEED = 1,
     MIN_MEMORY = 255

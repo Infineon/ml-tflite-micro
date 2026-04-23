@@ -33,6 +33,10 @@ std::vector<int8_t> channelwiseSlicedWeights(const int8_t *filters, const TfLite
                                                     const unsigned int slice_size);
 #endif
 
+#if CY_IP_MXNNLITE_VERSION>=3
+std::vector<int8_t> filterwiseSlicedWeights(const int8_t *nhwc_filters, const TfLiteIntArray &dims,
+                                               const unsigned int filters_per_stripe);
+#endif
 
 /**
  * \brief       Pack weights in IFX sparse/narrow bitwidth formats. 
@@ -99,7 +103,8 @@ TfLiteFusedActivation GetRandomTflmSupportedFusedActivation(std::mt19937 &random
 void GetRandomBitWidth(std::mt19937 &random, uint8_t &bits_per_item, uint8_t &container_bits);
 
 #if ENABLE_GR_DECODER
-std::vector<int8_t> GRCompression(std::mt19937 &random, std::vector<int8_t> &unpacked_weights, const ifx::mxnnlite::GRCompressionMode gr_mode, size_t num_w_elts); 
+std::vector<int8_t> GRCompression(std::mt19937 &random, std::vector<int8_t> &unpacked_weights,
+  const ifx::mxnnlite::GRCompressionMode gr_mode, size_t num_w_elts, TfLiteCustomSub8BitPackingDetails *packing);
 #endif
 
 /**
@@ -131,7 +136,10 @@ void GetRandomParams(std::mt19937 &random, TfLiteIntArray* input_dims,
   int8_t strideW = std::uniform_int_distribution<int8_t>(1, 2)(random);
   params.stride_width = (inputWidth > 2*strideW) ? strideW : 1;
   bool try_dilation = std::uniform_int_distribution<int8_t>(1, 3)(random) == 1;
-#if defined(IFX_MXNNLITE3) && defined(ENABLE_GR_DECODER)
+  // TODO improve this.  This basically just focusses coverage on HW accelerated features
+  // to aid HW verification.  Should be a seperate switch or reflected in overall test suit
+  // selectiohn.  E.g. by including a pure SW-only run exercising coverage evenly.
+#if defined(ENABLE_GR_DECODER) || defined(ENABLE_FILTERWISE_PARALLEL)
   try_dilation = false;
 #endif
   if (try_dilation) {
@@ -193,7 +201,7 @@ void CheckWithinLsbTolerance( const T *expected, T *observed, unsigned int len,
     // abs_diff 1.   This is needed for CMSIS_NN conv kernels
     // which internally use only 16-bit accumulators...
     int abs_diff = std::abs(static_cast<T>(expected[i]-observed[i])) ;
-    if( abs_diff != 0 && abs_diff >= tolerance) {
+    if( abs_diff > tolerance) {
       MicroPrintf( "%d: lsb err expect %d got %d %d/%d\n", i, (int)expected[i], (int)observed[i], lsb_errs, lsb_errs_ok);
       ++lsb_errs;
     }

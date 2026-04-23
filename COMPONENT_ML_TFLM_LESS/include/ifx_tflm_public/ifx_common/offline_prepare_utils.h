@@ -30,16 +30,19 @@ Preinterpretation support:
 
 #define TFLMC_CAPTURED_OP_USER_DATA_FPTR(funptr_name) \
   (tflite::micro::recordLiteralForPointer(#funptr_name, reinterpret_cast<void*>(&funptr_name)), &funptr_name)
+// TODO not implemented (yet) but here as a reminder so we do't forget and wonder why conv etc won't wrok
+#define TFLMC_CAPTURED_OP_USER_DATA_BLOCK(name, type, size, ptr) \
+  (tflite::micro::recordBlockForAddressSubstition(name, #type, size, static_cast<type *>(ptr)))
 
 #elif TF_LITE_MICRO_USE_OFFLINE_OP_USER_DATA
 
 #define TFLMC_CAPTURED_OP_USER_DATA_FPTR(funptr_name) \
   &funptr_name
-  
+#define TFLMC_CAPTURED_OP_USER_DATA_BLOCK(name, type, size, ptr) (ptr)
 #else
 #define TFLMC_CAPTURED_OP_USER_DATA_FPTR(funptr_name) \
   &funptr_name
-
+#define TFLMC_CAPTURED_OP_USER_DATA_BLOCK(name, type, size, ptr) (ptr)
 #endif
 
 /* For pre-interpreter case (TF_LITE_MICRO_RECORD_OP_USER_DATA) the buffer will be allocated from heap
@@ -56,6 +59,24 @@ For interpreter execution, buffer need to be allocated in the arena (contents fi
 
 #define TFLMC_CODE_GENERATED_BUFFER(context, buf_size) \
   context->AllocatePersistentBuffer(context, buf_size)
+
+#endif
+
+// Logging enabled when user passes: -DTF_LITE_IFX_INFO_PRINTF
+#if TF_LITE_IFX_INFO_PRINTF
+
+// Logging ON
+#define IFX_KERNEL_LOG(layer, is_npu, fmt, ...) \
+    MicroPrintf("Layer %s with shape of " fmt " - NNLite v2 - %s", \
+                layer,                          \
+                __VA_ARGS__,                    \
+                (is_npu ? "accelerated by NPU"  \
+                        : "SW fallback to CPU"))
+
+#else
+
+// Logging OFF
+#define IFX_KERNEL_LOG(layer, is_npu, fmt, ...) do {} while (0)
 
 #endif
 

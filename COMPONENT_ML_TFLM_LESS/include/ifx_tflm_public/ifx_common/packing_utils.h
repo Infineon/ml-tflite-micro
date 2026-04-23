@@ -38,7 +38,7 @@ namespace micro {
  **/
 
 constexpr int sparse_weight_type =
-#if defined(IFX_FAST_RIVAL) || defined(IFX_MXNNLITE) || defined(IFX_MXNNLITE2) || defined(IFX_MXNNLITE3) 
+#if defined(IFX_MXNNLITE) || defined(IFX_MXNNLITE2) || defined(IFX_MXNNLITE3) 
   TfliteCompressionType::WORD_RUN_LENGTHS;
 #else
   TfliteCompressionType::NO_RUN_LENGTHS;

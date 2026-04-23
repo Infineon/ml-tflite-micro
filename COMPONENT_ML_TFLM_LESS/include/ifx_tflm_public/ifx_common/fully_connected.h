@@ -20,6 +20,6 @@ namespace tflite {
 /**
  * @brief Invokes tflite reference implementations
 */
-TFLMRegistration Register_FULLY_CONNECTED_IFX_FAST_REF();
+TFLMRegistration Register_FULLY_CONNECTED_REF();
 
 }  // namespace tflite

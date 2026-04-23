@@ -6,6 +6,18 @@ Refer to the [README.md](./README.md) for a complete description of the ModusToo
 
 ## What Changed?
 
+### v3.3.0
+
+* Fixed FullyConnected (FC) per-channel quantization in NNLite integration
+* Updated codebase to TFLM upstream Nov 2025
+
+### v3.2.0
+
+* Validated Multi-Input/Multi-Output (MIMO) model support.
+* Validated runtime quantization parameter support per tensor (zero_point, scale); parameters can be defined at both design time and run time.
+* Added and validated RELU_0TO1 and RELU_N1TO1 activation function support for NNLite™ NPU.
+* Other minor fixes.
+
 ### v3.1.0
 
 * Implemented support for PSOC Edge™ capabilities:
@@ -29,10 +41,10 @@ This version of the ModusToolbox™ Machine Learning TFLiteU asset was validated
 
 | Software and Tools                                      | Version      |
 | :---                                                    | :----:       |
-| ModusToolbox™ Software Environment                      | 3.4.0        |
-| GCC Compiler                                            | 11.3         |
+| ModusToolbox™ Software Environment                      | 3.6.0        |
+| GCC Compiler                                            | 14.2         |
 | ARM Compiler 6                                          | 6.22         |
-| LLVM**                                                  | 19.1.1       |
+| LLVM**                                                  | 19.1.5       |
 
 **LLVM supported for CM4- and CM33-only, CM33 with NNLite, softFP only.
 
@@ -45,4 +57,4 @@ For more information, refer to the following documents:
 * [Infineon Technologies AG](https://www.infineon.com)
 
 ---
-© 2022-2025, Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation.
+© 2022-2026, Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation.

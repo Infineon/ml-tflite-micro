@@ -24,7 +24,7 @@ limitations under the License.
 
 namespace tflite {
 
-TFLMRegistration Register_CONV_2D_IFX_FAST_REF();
+TFLMRegistration Register_CONV_2D_REF();
 
 }  // namespace tflite
 
