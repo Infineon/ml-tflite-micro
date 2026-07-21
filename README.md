@@ -69,5 +69,5 @@ See [tensorflow-lite documentation](https://www.tensorflow.org/lite) for general
 * [Cypress Semiconductor](http://www.cypress.com)
 
 ---
-© 2022-2025, Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation.
+© 2022-2026, Infineon Technologies AG or an affiliate of Infineon Technologies AG.
 

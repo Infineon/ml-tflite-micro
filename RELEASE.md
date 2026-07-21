@@ -6,6 +6,13 @@ Refer to the [README.md](./README.md) for a complete description of the ModusToo
 
 ## What Changed?
 
+### v3.4.0
+
+* Fixed group convolution for CM33 with NNLite™ NPU
+* Fixed NNLite™ v2 hardware limits handling with CPU fallbacks
+* Added Add, Sub, Mul operations and activation functions chunking for NNLite™ NPU
+* Updated codebase to TFLM upstream Nov 2025, patch version 15
+
 ### v3.3.0
 
 * Fixed FullyConnected (FC) per-channel quantization in NNLite integration
@@ -53,8 +60,8 @@ This version of the ModusToolbox™ Machine Learning TFLiteU asset was validated
 For more information, refer to the following documents:
 
 * [ModusToolbox™ Machine Learning Design Support](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software/modustoolbox-machine-learning/)
-* [ModusToolbox Software Environment, Quick Start Guide, Documentation, and Videos](https://www.cypress.com/products/modustoolbox-software-environment)
+* [ModusToolbox Software](https://www.infineon.com/design-resources/development-tools/sdk/modustoolbox-software)
 * [Infineon Technologies AG](https://www.infineon.com)
 
 ---
-© 2022-2026, Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation.
+© 2022-2026, Infineon Technologies AG or an affiliate of Infineon Technologies AG.

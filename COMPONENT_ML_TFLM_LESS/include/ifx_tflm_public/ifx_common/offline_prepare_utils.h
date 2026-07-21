@@ -30,9 +30,9 @@ Preinterpretation support:
 
 #define TFLMC_CAPTURED_OP_USER_DATA_FPTR(funptr_name) \
   (tflite::micro::recordLiteralForPointer(#funptr_name, reinterpret_cast<void*>(&funptr_name)), &funptr_name)
-// TODO not implemented (yet) but here as a reminder so we do't forget and wonder why conv etc won't wrok
+
 #define TFLMC_CAPTURED_OP_USER_DATA_BLOCK(name, type, size, ptr) \
-  (tflite::micro::recordBlockForAddressSubstition(name, #type, size, static_cast<type *>(ptr)))
+  (tflite::micro::recordBlockForAddressSubstitution(name, #type, size, static_cast<void *>(ptr)), ptr)
 
 #elif TF_LITE_MICRO_USE_OFFLINE_OP_USER_DATA
 
@@ -50,7 +50,7 @@ as the objects normally held in those buffers will code-generated static data ob
 and so will need no space in the arena.
 For interpreter execution, buffer need to be allocated in the arena (contents filled in 'Prepare').
 */
-#if TF_LITE_MICRO_RECORD_OP_USER_DATA
+#if TF_LITE_MICRO_RECORD_OP_USER_DATA || TF_LITE_MICRO_USE_OFFLINE_OP_USER_DATA
 
 #define TFLMC_CODE_GENERATED_BUFFER(context, buf_size) \
   malloc(buf_size)

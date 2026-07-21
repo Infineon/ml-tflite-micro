@@ -25,6 +25,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/compatibility.h"
 #include "tensorflow/lite/micro/kernels/batch_matmul.h"
 #include "tensorflow/lite/micro/kernels/ethosu.h"
+#include "tensorflow/lite/micro/kernels/nnlite.h"
 #include "tensorflow/lite/micro/kernels/maximum_minimum.h"
 #include "tensorflow/lite/micro/kernels/micro_ops.h"
 #include "tensorflow/lite/micro/kernels/svdf.h"
@@ -273,6 +274,14 @@ class MicroMutableOpResolver : public MicroOpResolver {
     TFLMRegistration* registration = tflite::Register_ETHOSU();
     if (registration) {
       return AddCustom(tflite::GetString_ETHOSU(), registration);
+    }
+    return kTfLiteOk;
+  }
+
+  TfLiteStatus AddNNLite() {
+    TFLMRegistration* registration = tflite::Register_NNLITE();
+    if (registration) {
+      return AddCustom(tflite::GetString_NNLITE(), registration);
     }
     return kTfLiteOk;
   }

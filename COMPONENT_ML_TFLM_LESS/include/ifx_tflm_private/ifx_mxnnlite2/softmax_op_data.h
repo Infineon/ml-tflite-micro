@@ -19,6 +19,8 @@ limitations under the License.
 #include "tensorflow/lite/c/builtin_op_data.h"
 #include "tensorflow/lite/c/common.h"
 #include "cy_nn_kernel.h"
+// Needed for SoftmaxParams
+#include "tensorflow/lite/kernels/internal/types.h"
 
 namespace tflite {
 namespace ops {
@@ -39,6 +41,9 @@ EVAL_FUNC_DECL(SoftmaxFloat);
 EVAL_FUNC_DECL(SoftmaxQuantizedInt8);
 EVAL_FUNC_DECL(SoftmaxQuantizedInt8OutInt16);
 EVAL_FUNC_DECL(SoftmaxQuantizedInt16);
+EVAL_FUNC_DECL(SoftmaxQuantizedInt8SW);
+EVAL_FUNC_DECL(SoftmaxQuantizedInt8OutInt16SW);
+EVAL_FUNC_DECL(SoftmaxQuantizedInt16SW);
 
 #undef EVAL_FUNC_DECL
 
@@ -50,6 +55,14 @@ struct OpData {
 
   // Eval function pointer
   EvalVariantFptr eval_function;
+
+  // Reference / CMSIS-NN parameters for SW fallback (valid when eval_function
+  // points to a SW variant). Must be AFTER eval_function to preserve the
+  // aggregate-initializer layout emitted by pre-generated model files:
+  //   {buffer_idx, dims, op_params, eval_function}
+  SoftmaxParams ref_op_data;
+  int32_t num_rows;
+  int32_t row_size;
 };
 
 

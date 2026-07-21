@@ -33,7 +33,6 @@ namespace depthwise_conv {
 
 struct MxNNLiteExtOpData {
   float* per_channel_mxnnlite_scaler;
-  int32_t* depthwise_padded_bias;
 };
 
 
@@ -53,7 +52,7 @@ namespace ops {
 namespace micro {
 namespace depthwise_conv {
 
-bool MxNNLiteSupported(int output_zp, const TfLiteConvParams &conv_params);
+bool MxNNLiteSupported(const TfLiteConvParams &conv_params);
 
 TfLiteStatus EvalQuantizedPerChannelNNLite( 
     TfLiteContext* context, TfLiteNode* node, 

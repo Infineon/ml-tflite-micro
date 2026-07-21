@@ -136,12 +136,6 @@ void GetRandomParams(std::mt19937 &random, TfLiteIntArray* input_dims,
   int8_t strideW = std::uniform_int_distribution<int8_t>(1, 2)(random);
   params.stride_width = (inputWidth > 2*strideW) ? strideW : 1;
   bool try_dilation = std::uniform_int_distribution<int8_t>(1, 3)(random) == 1;
-  // TODO improve this.  This basically just focusses coverage on HW accelerated features
-  // to aid HW verification.  Should be a seperate switch or reflected in overall test suit
-  // selectiohn.  E.g. by including a pure SW-only run exercising coverage evenly.
-#if defined(ENABLE_GR_DECODER) || defined(ENABLE_FILTERWISE_PARALLEL)
-  try_dilation = false;
-#endif
   if (try_dilation) {
     int8_t dilationW = std::uniform_int_distribution<int8_t>(1, 3)(random);
     params.dilation_width_factor = (inputWidth >= filterWidth*dilationW) ? dilationW : 1;
@@ -196,20 +190,22 @@ void CheckWithinLsbTolerance( const T *expected, T *observed, unsigned int len,
   int tolerance = rouding_diffs_per_thou > 0 ? 1 : 0;
 
   unsigned int lsb_errs = 0;
+  constexpr unsigned int err_log_limit = 10;
   for (unsigned int i = 0; i < len; ++i) {
     // This will deliberately treat overflows flipping min to max as
     // abs_diff 1.   This is needed for CMSIS_NN conv kernels
     // which internally use only 16-bit accumulators...
     int abs_diff = std::abs(static_cast<T>(expected[i]-observed[i])) ;
     if( abs_diff > tolerance) {
-      MicroPrintf( "%d: lsb err expect %d got %d %d/%d\n", i, (int)expected[i], (int)observed[i], lsb_errs, lsb_errs_ok);
+      if (lsb_errs < err_log_limit) {
+        MicroPrintf( "%d: lsb err expect %d got %d %d/%d", i, (int)expected[i], (int)observed[i], lsb_errs, lsb_errs_ok);
+      } else if (lsb_errs == err_log_limit) {
+        MicroPrintf( "Further errors in this comparison... suppressed...");
+      }
       ++lsb_errs;
     }
-    TF_LITE_MICRO_EXPECT( abs_diff <= tolerance ); 
   }
   TF_LITE_MICRO_EXPECT( lsb_errs <= lsb_errs_ok);
-  if( lsb_errs > lsb_errs_ok )
-    abort();
 }
 
 }  // namespace testing

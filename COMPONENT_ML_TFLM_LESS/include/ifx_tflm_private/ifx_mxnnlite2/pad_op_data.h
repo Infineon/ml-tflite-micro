@@ -35,7 +35,8 @@ typedef PAD_EVAL_FUNC_DECL((*PadEvalVariantFptr));
 struct PadOpData {
   tflite::OpData reference_op_data;
   PadEvalVariantFptr eval_function;
-  const float* out_scaling_factor; // Persistent pointer allocated in Prepare
+  const float* out_scaling_factor;   // Persistent pointer allocated in Prepare
+  const int8_t* identity_weights;    // Persistent unit-valued weights for NNLite DW path
 };
 
 }  // namespace pad
