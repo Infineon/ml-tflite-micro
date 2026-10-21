@@ -141,6 +141,9 @@ class MicroInterpreter {
   // Returns a pointer to the tensor for the corresponding tensor_index
   TfLiteEvalTensor* GetTensor(int tensor_index, int subgraph_index = 0);
 
+  // Zeros out a single variable tensor in a specified subgraph in the model.
+  TfLiteStatus ResetVariableTensor(int tensor_index, int subgraph_index = 0);
+
 
   size_t operators_size() const { return model_->subgraphs()->Get(0)->operators()->size(); }
 
@@ -164,7 +167,7 @@ class MicroInterpreter {
   // Returns the actual used arena in bytes. This method gives the optimal arena
   // size. It's only available after `AllocateTensors` has been called.
   // Note that normally `tensor_arena` requires 16 bytes alignment to fully
-  // utilize the space. If it's not the case, the optimial arena size would be
+  // utilize the space. If it's not the case, the optimal arena size would be
   // arena_used_bytes() + 16.
   size_t arena_used_bytes() const { return allocator_.used_bytes(); }
 
@@ -207,9 +210,13 @@ class MicroInterpreter {
   // Set the alternate decompression memory regions.
   // Can only be called during the MicroInterpreter kInit state (i.e. must
   // be called before MicroInterpreter::AllocateTensors).
+  // The regions pointer argument is the start of a
+  // MicroContext::AlternateMemoryRegion array where the length of the array is
+  // given by the count argument.
+  // The lifetime of the MicroContext::AlternateMemoryRegion array must be at
+  // least that of the MicroInterpreter.
   TfLiteStatus SetDecompressionMemory(
-      const std::initializer_list<MicroContext::AlternateMemoryRegion>&
-          regions);
+      const MicroContext::AlternateMemoryRegion* regions, size_t count);
 
  protected:
   const MicroAllocator& allocator() const { return allocator_; }

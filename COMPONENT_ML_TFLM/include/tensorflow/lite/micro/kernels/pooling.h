@@ -112,7 +112,31 @@ void MaxPoolingEvalQuantized(TfLiteContext* context, TfLiteNode* node,
                                  tflite::micro::GetTensorData<T>(output));
 }
 
+#if defined(CMSIS_NN) || defined(XTENSA)
+TFLMRegistration Register_AVERAGE_POOL_2D_INT8();
 
+TFLMRegistration Register_MAX_POOL_2D_INT8();
+
+TFLMRegistration Register_AVERAGE_POOL_2D_INT16();
+
+TFLMRegistration Register_MAX_POOL_2D_INT16();
+#else
+inline TFLMRegistration Register_AVERAGE_POOL_2D_INT8() {
+  return tflite::Register_AVERAGE_POOL_2D();
+}
+
+inline TFLMRegistration Register_MAX_POOL_2D_INT8() {
+  return tflite::Register_MAX_POOL_2D();
+}
+
+inline TFLMRegistration Register_AVERAGE_POOL_2D_INT16() {
+  return tflite::Register_AVERAGE_POOL_2D();
+}
+
+inline TFLMRegistration Register_MAX_POOL_2D_INT16() {
+  return tflite::Register_MAX_POOL_2D();
+}
+#endif
 }  // namespace tflite
 
 #endif  // TENSORFLOW_LITE_MICRO_KERNELS_POOLING_H_

@@ -44,10 +44,10 @@ class DecodeStateHuffman : public DecodeState {
   static constexpr uint16_t kTable16BitCountMask = 0x7800;
   static constexpr size_t kTable16BitCountShift = 11;
   static constexpr uint16_t kTable16BitValueMask = 0x07FF;
-  static constexpr uint32_t kTable32BitSymbolFoundMask = 0x8000'0000;
-  static constexpr uint32_t kTable32BitCountMask = 0x7800'0000;
+  static constexpr uint32_t kTable32BitSymbolFoundMask = 0x80000000;
+  static constexpr uint32_t kTable32BitCountMask = 0x78000000;
   static constexpr size_t kTable32BitCountShift = 27;
-  static constexpr uint32_t kTable32BitValueMask = 0x07FF'FFFF;
+  static constexpr uint32_t kTable32BitValueMask = 0x07FFFFFF;
 
   //
   // Huffman Decode Common Metadata constants
@@ -59,7 +59,6 @@ class DecodeStateHuffman : public DecodeState {
   // Initial table size of N elements where value is log2(N) - 1
   static constexpr uint8_t kDcmTableSizeInitialMask = 0xF0;
   static constexpr size_t kDcmTableSizeInitialShift = 4;
-  TF_LITE_REMOVE_VIRTUAL_DELETE
 
  private:
   inline bool IsLittleEndian() const {
@@ -146,6 +145,9 @@ class DecodeStateHuffman : public DecodeState {
   bool use_32bit_table_ = false;
   uint8_t initial_table_size_ = 0;  // log2(N) - 1 where N is
                                     // number of table elements
+
+ public:
+  TF_LITE_REMOVE_VIRTUAL_DELETE
 };
 
 }  // namespace tflite

@@ -75,8 +75,7 @@ class DecodeState {
   static constexpr uint8_t kDcmTypeCustom = 127;
 
   static constexpr size_t kDcmSizeInBytes = 16;
-  TF_LITE_REMOVE_VIRTUAL_DELETE
-    
+
  private:
   static constexpr size_t kDcmDecodeTypeOffset = 0;
   static constexpr size_t kDcmVersionOffset = 1;
@@ -85,6 +84,9 @@ class DecodeState {
  protected:
   const TfLiteContext* context_;
   MicroProfilerInterface* micro_profiler_;
+
+ private:
+  TF_LITE_REMOVE_VIRTUAL_DELETE
 };
 
 }  // namespace tflite

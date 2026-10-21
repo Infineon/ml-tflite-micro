@@ -61,7 +61,7 @@ class DecodeStatePrune : public DecodeState {
   bool use_alternate_axis_ = false;    // shape channel axis:
                                        // false = first, true = last
 
-public:
+ public:
   TF_LITE_REMOVE_VIRTUAL_DELETE
 };
 

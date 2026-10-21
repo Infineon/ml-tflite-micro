@@ -18,16 +18,26 @@ limitations under the License.
 #include <cstdio>
 #include <cstring>
 
+#include "signal/micro/kernels/irfft.h"
+#include "signal/micro/kernels/rfft.h"
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/core/api/flatbuffer_conversions.h"
 #include "tensorflow/lite/kernels/internal/compatibility.h"
 #include "tensorflow/lite/kernels/op_macros.h"
 #include "tensorflow/lite/micro/compatibility.h"
+#include "tensorflow/lite/micro/kernels/add.h"
 #include "tensorflow/lite/micro/kernels/batch_matmul.h"
+#include "tensorflow/lite/micro/kernels/conv.h"
+#include "tensorflow/lite/micro/kernels/depthwise_conv.h"
 #include "tensorflow/lite/micro/kernels/ethosu.h"
 #include "tensorflow/lite/micro/kernels/nnlite.h"
+#include "tensorflow/lite/micro/kernels/fully_connected.h"
 #include "tensorflow/lite/micro/kernels/maximum_minimum.h"
 #include "tensorflow/lite/micro/kernels/micro_ops.h"
+#include "tensorflow/lite/micro/kernels/mul.h"
+#include "tensorflow/lite/micro/kernels/pooling.h"
+#include "tensorflow/lite/micro/kernels/reduce.h"
+#include "tensorflow/lite/micro/kernels/softmax.h"
 #include "tensorflow/lite/micro/kernels/svdf.h"
 #include "tensorflow/lite/micro/kernels/transpose_conv.h"
 #include "tensorflow/lite/micro/kernels/unidirectional_sequence_lstm.h"
@@ -529,6 +539,11 @@ class MicroMutableOpResolver : public MicroOpResolver {
                       ParseReadVariable);
   }
 
+  TfLiteStatus AddReduceAll(
+      const TFLMRegistration& registration = Register_REDUCE_ALL()) {
+    return AddBuiltin(BuiltinOperator_REDUCE_ALL, registration, ParseReducer);
+  }
+
   TfLiteStatus AddReduceMax(
       const TFLMRegistration& registration = Register_REDUCE_MAX()) {
     return AddBuiltin(BuiltinOperator_REDUCE_MAX, registration, ParseReducer);
@@ -548,15 +563,13 @@ class MicroMutableOpResolver : public MicroOpResolver {
       const TFLMRegistration& registration = tflite::Register_RELU6()) {
     return AddBuiltin(BuiltinOperator_RELU6, registration, ParseRelu6);
   }
-
-  TfLiteStatus AddRelu0to1() {
-    return AddBuiltin(BuiltinOperator_RELU_0_TO_1, tflite::Register_RELU0TO1(),
-                      ParseRelu0to1);
+  
+  TfLiteStatus AddRelu0to1(const TFLMRegistration& registration =  tflite::Register_RELU0TO1()) {
+    return AddBuiltin(BuiltinOperator_RELU_0_TO_1, registration, ParseRelu0to1);
   }
 
-  TfLiteStatus AddReluN1to1() {
-    return AddBuiltin(BuiltinOperator_RELU_N1_TO_1, tflite::Register_RELUN1TO1(),
-                      ParseReluN1to1);
+  TfLiteStatus AddReluN1to1(const TFLMRegistration& registration =  tflite::Register_RELUN1TO1()) {
+    return AddBuiltin(BuiltinOperator_RELU_N1_TO_1, registration, ParseReluN1to1);
   }
 
   TfLiteStatus AddReshape(

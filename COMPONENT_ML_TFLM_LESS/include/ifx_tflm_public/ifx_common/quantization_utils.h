@@ -18,7 +18,7 @@ limitations under the License.
 #include <cmath>
 #include <cstdint>
 #include <limits>
-
+#include <cassert>
 #include <tensorflow/lite/c/common.h>
 
 
@@ -46,11 +46,13 @@ inline float MinFromZeroPointScale(const int zero_point, const float scale) {
 
 inline float ScaleFromMinMaxPacked(const float min, const float max, 
                                    const uint32_t num_bits, bool symmetric=false) {
-  float code_points  = static_cast<float>((1<<num_bits)-1);
+  auto num_code_points = (static_cast<uint64_t>(1) << num_bits)-1u;
   if (symmetric) {
-    code_points -= 1.0f;
+    num_code_points -= 1;
   }
-  return (max - min) / code_points;
+  auto res = (max - min) / static_cast<float>(num_code_points);
+  assert(std::isfinite(res));
+  return res;
 }
 
 

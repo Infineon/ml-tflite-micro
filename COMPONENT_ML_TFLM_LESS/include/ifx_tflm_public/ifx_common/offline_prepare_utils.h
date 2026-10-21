@@ -28,8 +28,28 @@ Preinterpretation support:
 #if TF_LITE_MICRO_RECORD_OP_USER_DATA
 #include <string>
 
+namespace tflite {
+namespace micro {
+
+void recordLiteralForPointer(const std::string& literal, void* ptr);
+
+// Typed wrapper keeps enough function-pointer context for direct capture of
+// concrete function-template instances such as &Foo<Bar>.
+// This avoids compiler failures seen with the old comma-expression macro in
+// cases where '&funptr_name' is a templated function instance.
+template <typename FunctionPtr>
+inline FunctionPtr CaptureOpUserDataFptr(const char* literal,
+                                         FunctionPtr function_ptr) {
+  recordLiteralForPointer(literal, reinterpret_cast<void*>(function_ptr));
+  return function_ptr;
+}
+
+}  // namespace micro
+}  // namespace tflite
+
 #define TFLMC_CAPTURED_OP_USER_DATA_FPTR(funptr_name) \
-  (tflite::micro::recordLiteralForPointer(#funptr_name, reinterpret_cast<void*>(&funptr_name)), &funptr_name)
+  /* Records literal pointer and returns the same typed function pointer. */ \
+  (::tflite::micro::CaptureOpUserDataFptr(#funptr_name, &funptr_name))
 
 #define TFLMC_CAPTURED_OP_USER_DATA_BLOCK(name, type, size, ptr) \
   (tflite::micro::recordBlockForAddressSubstitution(name, #type, size, static_cast<void *>(ptr)), ptr)

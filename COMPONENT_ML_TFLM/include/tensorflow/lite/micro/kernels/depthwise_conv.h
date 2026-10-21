@@ -54,6 +54,37 @@ TfLiteStatus DepthwiseConvPrepare(TfLiteContext* context, TfLiteNode* node);
 // implementation (reference or optimized) must define this function.
 TFLMRegistration Register_DEPTHWISE_CONV_2D();
 
+#if defined(CMSIS_NN)
+// Returns a TFLMRegistration struct for kernel variant that only supports
+// int8 activations and int8 weights and uses the latency optimized
+// implementations.
+TFLMRegistration Register_DEPTHWISE_CONV_2D_INT8();
+
+// Returns a TFLMRegistration struct for kernel variant that only supports
+// int16 activations and int8 weights and uses the latency optimized
+// implementations.
+TFLMRegistration Register_DEPTHWISE_CONV_2D_INT16();
+
+// Returns a TFLMRegistration struct for kernel variant that only supports
+// int8 activations and int4 weights and uses the latency optimized
+// implementations.
+TFLMRegistration Register_DEPTHWISE_CONV_2D_INT4();
+
+#else
+inline TFLMRegistration Register_DEPTHWISE_CONV_2D_INT8() {
+  return Register_DEPTHWISE_CONV_2D();
+}
+
+inline TFLMRegistration Register_DEPTHWISE_CONV_2D_INT16() {
+  return Register_DEPTHWISE_CONV_2D();
+}
+
+inline TFLMRegistration Register_DEPTHWISE_CONV_2D_INT4() {
+  return Register_DEPTHWISE_CONV_2D();
+}
+
+#endif
+
 }  // namespace tflite
 
 #endif  // TENSORFLOW_LITE_MICRO_KERNELS_DEPTHWISE_CONV_H_

@@ -6,6 +6,17 @@ Refer to the [README.md](./README.md) for a complete description of the ModusToo
 
 ## What Changed?
 
+### v3.5.0
+* Fix depthwise-convolution kernel namespacing and refine NNLite™ v2 operation and activation chunking
+* Migrated from LLVM 19 to LLVM 22 and validated
+* Allow CMSIS-NN depthwise convolution with batch sizes greater than one
+* Updated codebase to TFLM upstream Mar 2026, tag version 25
+    * New upstream base version
+    * Updates and fixes related to NNLite2 operations (Depthwise, Pad etc)
+    * Updated driver stack for NNLite2
+    * Fixes for tflm_less dummy buffers definition
+    * flatbuffers version update
+
 ### v3.4.0
 
 * Fixed group convolution for CM33 with NNLite™ NPU
@@ -48,10 +59,10 @@ This version of the ModusToolbox™ Machine Learning TFLiteU asset was validated
 
 | Software and Tools                                      | Version      |
 | :---                                                    | :----:       |
-| ModusToolbox™ Software Environment                      | 3.6.0        |
+| ModusToolbox™ Software Environment                      | 3.9.0        |
 | GCC Compiler                                            | 14.2         |
 | ARM Compiler 6                                          | 6.22         |
-| LLVM**                                                  | 19.1.5       |
+| LLVM**                                                  | 22.1.0       |
 
 **LLVM supported for CM4- and CM33-only, CM33 with NNLite, softFP only.
 

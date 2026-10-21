@@ -91,7 +91,43 @@ TfLiteStatus ConvPrepare(TfLiteContext* context, TfLiteNode* node);
 // implementation (reference or optimized) must define this function.
 TFLMRegistration Register_CONV_2D();
 
+#if defined(XTENSA)
+// Returns a TFLMRegistration struct for kernel variant that only supports
+// int8 activations and int8 weights and always calls the reference
+// implementation.
+TFLMRegistration Register_CONV_2D_INT8REF();
 
+#else
+inline TFLMRegistration Register_CONV_2D_INT8REF() {
+  return Register_CONV_2D();
+}
+#endif  // defined(XTENSA)
+
+#if defined(CMSIS_NN)
+// Returns a TFLMRegistration struct for kernel variant that only supports
+// int8 activations and int4 weights and uses the latency optimized
+// implementations.
+TFLMRegistration Register_CONV_2D_INT4();
+#else
+inline TFLMRegistration Register_CONV_2D_INT4() { return Register_CONV_2D(); }
+#endif  // defined(CMSIS_NN)
+
+#if defined(CMSIS_NN) || defined(XTENSA)
+// Returns a TFLMRegistration struct for kernel variant that only supports
+// int8 activations and int8 weights and uses the latency optimized
+// implementations.
+TFLMRegistration Register_CONV_2D_INT8();
+
+// Returns a TFLMRegistration struct for kernel variant that only supports
+// int16 activations and int8 weights and uses the latency optimized
+// implementations.
+TFLMRegistration Register_CONV_2D_INT16();
+
+#else
+inline TFLMRegistration Register_CONV_2D_INT8() { return Register_CONV_2D(); }
+
+inline TFLMRegistration Register_CONV_2D_INT16() { return Register_CONV_2D(); }
+#endif  // defined(CMSIS_NN) || defined(XTENSA)
 
 }  // namespace tflite
 

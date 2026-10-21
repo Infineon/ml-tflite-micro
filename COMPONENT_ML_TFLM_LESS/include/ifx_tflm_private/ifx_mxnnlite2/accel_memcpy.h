@@ -15,68 +15,65 @@ limitations under the License.
 
 #include <cstring>
 #include <cstdint>
-
+#include <cassert>
+#include "tensorflow/lite/c/c_api_types.h"
 #include "cy_nn_kernel.h"
 
 namespace tflite {
 namespace micro {
 namespace nnlite {
 
-#ifndef NNLITE_COPY_THRESHOLD_BYTES
-#define NNLITE_COPY_THRESHOLD_BYTES 128
-#endif
-constexpr size_t kNNLiteThresholdBytes = NNLITE_COPY_THRESHOLD_BYTES;
+
+/**
+ * \brief  Accelerated size-unlimited initial block copy
+ *
+ */
+TfLiteStatus accel_initial_memcpy(int8_t *dst, const int8_t* src, uint32_t bytes);
+
+/**
+ * \brief  Accelerated size-unlimited follow-on block copy
+ *
+ * For large copies, we want to use the NNLite accelerator.  However, for some operations
+ * like concatenation, we may have many small copies to do.
+ * In this case, it is more efficient to setup the NNLite once and then trigger subsequent copies with a cheaper "redo"
+ * that doesn't require all the register setup.
+ *
+ *
+ * \note It is of course the responsibility of the caller to ensure the accelerator setup from
+ * the copying call (e.g. accel_initial_memcpy) is (still) valid when this function is called.
+ */
+
+TfLiteStatus accel_follow_on_memcpy(int8_t* dst, const int8_t* src, uint32_t bytes);
 
 /**
  * \brief  Accelerated block copy
- * 
+ *
  * Falls back to cpu for small copies where accelerator setup overhead would dominate.
  */
-inline void accel_memcpy(void* dst, const void* src, size_t bytes) {
-  if (bytes < kNNLiteThresholdBytes) {
-    // For small tensors, it's more efficient to copy the data with the CPU
-    // than setting up the nnlite's many registers...
-    memcpy(dst, src, bytes);
-  } else {
-    Cy_NNLite_Byte_Copy(static_cast<const int8_t *>(src), static_cast<int8_t *>(dst), bytes);
-  }
-}
+TfLiteStatus accel_memcpy(int8_t* dst, const int8_t* src, uint32_t bytes);
+
 
 /**
  * \brief Repeated Accelerated block copies
- * 
+ *
  * Falls back to cpu for small copies where accelerator setup overhead would dominate.
- * 
- * For large copies, we want to use the NNLite accelerator.  However, for some operations 
- * like concatenation, we may have many small copies to do. 
- * In this case, it is more efficient to setup the NNLite once and then trigger subsequent copies with a cheaper "redo" 
- * that doesn't require all the register setup. 
- * 
+ *
+ * For large copies, we want to use the NNLite accelerator.  However, for some operations
+ * like concatenation, we may have many small copies to do.
+ * In this case, it is more efficient to setup the NNLite once and then trigger subsequent copies with a cheaper "redo"
+ * that doesn't require all the register setup.
+ *
  * \param dst destination pointer
  * \param src source pointer
  * \param bytes number of bytes to copy for this call
- * \param total_bytes total number of bytes that will be copied across all calls for this sequence of 
+ * \param total_bytes total number of bytes that will be copsied across all calls for this sequence of
  *        copies.
- * \param Initialize accelerator (first call) for sequence of copies 
- * 
- * \note It must of course be guaranteed the the accelerator setup from the initial call is still valid for subsequent calls.  
+ * \param Initialize accelerator (first call) for sequence of copies
+ *
+ * \note It must of course be guaranteed the the accelerator setup from the initial call is still valid for subsequent calls.
  * */
 
-inline void accel_multi_memcpy(void* dst, const void* src, size_t bytes, size_t total_bytes, bool initialize) {
-  if( total_bytes < kNNLiteThresholdBytes ) {
-    // For small total copying ... just copy the data with the CPU
-    memcpy(dst, src, bytes);
-  } else if (initialize) {
-    Cy_NNLite_Byte_Copy(static_cast<const int8_t *>(src), static_cast<int8_t *>(dst), bytes);
-  } else if ( bytes < kNNLiteThresholdBytes/4 ) {
-    // For really small tensors, even if setup already, it is more efficient to copy the data with the CPU
-    // than setting up the nnlite's many registers...
-    memcpy(dst, src, bytes);
-  } else {
-    // For subsequent copies, after initialization, we can assume the nnlite is already setup and just trigger the copy.
-    Cy_NNLite_Redo_Byte_Copy(static_cast<const int8_t *>(src), static_cast<int8_t *>(dst), bytes);
-  }
-}
+TfLiteStatus accel_multi_memcpy(int8_t* dst, const int8_t* src, uint32_t bytes, uint32_t total_bytes, bool initialize);
 
 }  // namespace nnlite
 }  // namespace micro
